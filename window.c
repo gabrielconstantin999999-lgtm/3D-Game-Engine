@@ -14,6 +14,9 @@ typedef struct {
 
 void draw_line(double x1, double y1, double x2, double y2, SDL_Renderer *renderer);
 void draw_polygon(vec2* points, int count, SDL_Renderer* renderer);
+vec2 project(vec3 point, SDL_Renderer* renderer);
+
+
 
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
@@ -29,6 +32,19 @@ int main() {
     };
 
 
+    vec3 cube[] = {
+    // front face
+    {-1,  1, 2},
+    { 1,  1, 2},
+    { 1, -1, 2},
+    {-1, -1, 2},
+    // back face
+    {-1,  1, 4},
+    { 1,  1, 4},
+    { 1, -1, 4},
+    {-1, -1, 4},
+    };
+    vec2 projected[8] = {};
     int running = 1;
 
     while (running) {
@@ -38,9 +54,12 @@ int main() {
         SDL_RenderClear(ren);
 
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
+        for (int i = 0; i < 8; i++){
+            projected[i] = project(cube[i], ren);
+        }
+        draw_polygon(projected, 8, ren);
 
-
-        draw_polygon(points, 4, ren);
+        //draw_polygon(points, 4, ren);
         
 
         SDL_RenderPresent(ren);
@@ -78,3 +97,9 @@ void draw_polygon(vec2* points, int count, SDL_Renderer* renderer){
 }
 
 
+vec2 project(vec3 point, SDL_Renderer* renderer){
+    vec2 projected;
+    projected.x = ((point.x/point.z) * WIDTH/2 + WIDTH/2);
+    projected.y = ((point.y/point.z) * HEIGHT/2 + HEIGHT/2);
+    return projected;
+}
