@@ -32,19 +32,19 @@ int main() {
     };
 
 
-    vec3 cube[] = {
-    // front face
+    vec3 cube[8] = {
+    // front face (z = 2)
     {-1,  1, 2},
     { 1,  1, 2},
     { 1, -1, 2},
     {-1, -1, 2},
-    // back face
+    // back face (z = 4)
     {-1,  1, 4},
     { 1,  1, 4},
     { 1, -1, 4},
     {-1, -1, 4},
-    };
-    vec2 projected[8] = {};
+};
+    vec2 projected[8];
     int running = 1;
 
     while (running) {
@@ -56,8 +56,8 @@ int main() {
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
         for (int i = 0; i < 8; i++){
             projected[i] = project(cube[i], ren);
+            SDL_RenderPoint(ren, projected[i].x, projected[i].y);
         }
-        draw_polygon(projected, 8, ren);
 
         //draw_polygon(points, 4, ren);
         
