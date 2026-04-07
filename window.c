@@ -14,7 +14,20 @@ typedef struct {
         double x, y, z;
     }vec3;
 
-void draw_line(double x1, double y1, double x2, double y2, SDL_Renderer *renderer);
+typedef float mat4[16];
+
+typedef struct{
+    vec3 position;
+    vec3 target;
+    vec3 direction;
+    vec3 up;
+    vec3 right;
+    mat4 view;
+}Camera;
+
+
+vec3 normalize(vec3 v);
+vec3 subtract(vec3 v1, vec3 v2);
 void draw_polygon(vec2* points, int count, SDL_Renderer* renderer);
 vec2 project(vec3 point, SDL_Renderer* renderer);
 void bind_cube(vec2* points,SDL_Renderer* renderer);
@@ -33,6 +46,21 @@ int main() {
         {400.0f, 200.0f}
     };
 
+    vec3 up = {0.0f, 1.0f, 0.0f};
+
+    Camera cam;
+
+    cam.position.x = 0.0f;
+    cam.position.y = 0.0f;
+    cam.position.z = 5.0f;
+
+    cam.target.x = 0.0f;
+    cam.target.y = 0.0f;
+    cam.target.z = 0.0f;
+
+    cam.direction = normalize(subtract(cam.target, cam.position));
+    cam.right = normalize(cross(up, cam.direction));
+    cam.up = cross(cam.direction, cam.right);
 
     vec3 cube[8] = {
     // front face (z = 2)
@@ -46,12 +74,16 @@ int main() {
     { 1, -1, 4},
     {-1, -1, 4},
     };
+
     vec2 projected[8];
+
+    
     int running = 1;
 
     while (running) {
         while (SDL_PollEvent(&e))
             if (e.type == SDL_EVENT_QUIT) running = 0;
+
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
 
@@ -79,13 +111,7 @@ int main() {
 
 
 
-void draw_line(double x1, double y1, double x2, double y2, SDL_Renderer *renderer){
-    for (double t = 0; t <= 1; t += 0.001f){
-        double x = x1 + t * (x2 - x1);
-        double y = y1 + t * (y2 - y1);
-        SDL_RenderPoint(renderer, x, y);
-    }
-}
+
 
 void draw_polygon(vec2* points, int count, SDL_Renderer* renderer){
     if (count < 2){
@@ -94,7 +120,7 @@ void draw_polygon(vec2* points, int count, SDL_Renderer* renderer){
     for (int i = 0; i < count; i += 1){
         vec2 a = points[i];
         vec2 b = points[(i + 1) % count];
-        draw_line(a.x,a.y,b.x,b.y,renderer);
+        SDL_RenderLine(renderer, a.x,a.y,b.x,b.y);
     }
 }
 
@@ -145,3 +171,18 @@ void rotate_shape(vec3 *points, double angle, char axis, int count){
         };
     }
 
+vec3 subtract(vec3 v1, vec3 v2){
+    vec3 v3 = {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z};
+    return v3;
+}
+
+vec3 normalize(vec3 v){
+    double magnitude = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    vec3 v2 = {v.x/magnitude, v.y/magnitude, v.z/magnitude};
+    return v2;
+}
+
+vec3 cross(vec3 v1, vec3 v2){
+    vec3 v3 = {v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x};
+    return v3;
+}
