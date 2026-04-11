@@ -14,7 +14,9 @@ typedef struct {
         double x, y, z;
     }vec3;
 
-typedef float mat4[16];
+typedef struct{
+    float m[16];
+    }mat4;
 
 typedef struct{
     vec3 position;
@@ -32,6 +34,9 @@ void draw_polygon(vec2* points, int count, SDL_Renderer* renderer);
 vec2 project(vec3 point, SDL_Renderer* renderer);
 void bind_cube(vec2* points,SDL_Renderer* renderer);
 void rotate_shape(vec3 *points, double angle, char axis, int count);
+vec3 transform_point(vec3 p, mat4 m);
+mat4 mat_mul(mat4 a, mat4 b);
+vec3 cross(vec3 v1, vec3 v2);
 
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
@@ -49,7 +54,7 @@ int main() {
     vec3 up = {0.0f, 1.0f, 0.0f};
 
     Camera cam;
-
+    
     cam.position.x = 0.0f;
     cam.position.y = 0.0f;
     cam.position.z = 5.0f;
@@ -58,9 +63,36 @@ int main() {
     cam.target.y = 0.0f;
     cam.target.z = 0.0f;
 
-    cam.direction = normalize(subtract(cam.target, cam.position));
+    cam.direction = normalize(subtract(cam.position, cam.target));
     cam.right = normalize(cross(up, cam.direction));
     cam.up = cross(cam.direction, cam.right);
+
+    cam.view.m[0]  = cam.right.x;
+    cam.view.m[1]  = cam.right.y;
+    cam.view.m[2]  = cam.right.z;
+    cam.view.m[3]  = -(cam.right.x * cam.position.x +
+                cam.right.y * cam.position.y +
+                cam.right.z * cam.position.z);
+
+    cam.view.m[4]  = cam.up.x;
+    cam.view.m[5]  = cam.up.y;
+    cam.view.m[6]  = cam.up.z;
+    cam.view.m[7]  = -(cam.up.x * cam.position.x +
+                cam.up.y * cam.position.y +
+                cam.up.z * cam.position.z);
+
+    cam.view.m[8]  = cam.direction.x;
+    cam.view.m[9]  = cam.direction.y;
+    cam.view.m[10] = cam.direction.z;
+    cam.view.m[11] = -(cam.direction.x * cam.position.x +
+                cam.direction.y * cam.position.y +
+                cam.direction.z * cam.position.z);
+
+    cam.view.m[12] = 0.0f;
+    cam.view.m[13] = 0.0f;
+    cam.view.m[14] = 0.0f;
+    cam.view.m[15] = 1.0f;
+
 
     vec3 cube[8] = {
     // front face (z = 2)
@@ -76,7 +108,7 @@ int main() {
     };
 
     vec2 projected[8];
-
+    vec3 camera_space[8];
     
     int running = 1;
 
@@ -86,11 +118,51 @@ int main() {
 
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
+        int num;
+        const bool *key_states = SDL_GetKeyboardState(&num);
 
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
-        rotate_shape(cube, 0.5, 'x', 8);
+        if (key_states[SDL_SCANCODE_Z]) {cam.position.z += 0.01;}
+        if (key_states[SDL_SCANCODE_X]) {cam.position.x += 0.01;} 
+        if (key_states[SDL_SCANCODE_Y]) {cam.position.y += 0.01;} 
+        //rotate_shape(cube, 0.5, 'x', 8);
+        //cam.position.x += 0.001;
+        //cam.position.z += 0.001;
+        cam.direction = normalize(subtract(cam.target, cam.position));
+        cam.right = normalize(cross(up, cam.direction));
+        cam.up = cross(cam.direction, cam.right);
+
+        cam.view.m[0]  = cam.right.x;
+        cam.view.m[1]  = cam.right.y;
+        cam.view.m[2]  = cam.right.z;
+        cam.view.m[3]  = -(cam.right.x * cam.position.x +
+                    cam.right.y * cam.position.y +
+                    cam.right.z * cam.position.z);
+
+        cam.view.m[4]  = cam.up.x;
+        cam.view.m[5]  = cam.up.y;
+        cam.view.m[6]  = cam.up.z;
+        cam.view.m[7]  = -(cam.up.x * cam.position.x +
+                    cam.up.y * cam.position.y +
+                    cam.up.z * cam.position.z);
+
+        cam.view.m[8]  = cam.direction.x;
+        cam.view.m[9]  = cam.direction.y;
+        cam.view.m[10] = cam.direction.z;
+        cam.view.m[11] = -(cam.direction.x * cam.position.x +
+                    cam.direction.y * cam.position.y +
+                    cam.direction.z * cam.position.z);
+
+        cam.view.m[12] = 0.0f;
+        cam.view.m[13] = 0.0f;
+        cam.view.m[14] = 0.0f;
+        cam.view.m[15] = 1.0f;
+
         for (int i = 0; i < 8; i++){
-            projected[i] = project(cube[i], ren);
+            camera_space[i] = transform_point(cube[i], cam.view);
+        }
+        for (int i = 0; i < 8; i++){
+            projected[i] = project(camera_space[i], ren);
             SDL_RenderPoint(ren, projected[i].x, projected[i].y);
         }
         //draw_polygon(points, 4, ren);
@@ -186,3 +258,33 @@ vec3 cross(vec3 v1, vec3 v2){
     vec3 v3 = {v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x};
     return v3;
 }
+
+mat4 mat_mul(mat4 a, mat4 b)
+{
+    mat4 r;
+
+    for(int row = 0; row < 4; row++){
+        for(int col = 0; col < 4; col++)
+        {
+            r.m[row*4+col] =
+                a.m[row*4+0] * b.m[0*4+col] +
+                a.m[row*4+1] * b.m[1*4+col] +
+                a.m[row*4+2] * b.m[2*4+col] +
+                a.m[row*4+3] * b.m[3*4+col];
+        }
+    }
+    return r;
+}
+
+vec3 transform_point(vec3 p, mat4 m)
+{
+    vec3 r;
+    r.x = m.m[0]*p.x + m.m[1]*p.y + m.m[2]*p.z + m.m[3];
+    r.y = m.m[4]*p.x + m.m[5]*p.y + m.m[6]*p.z + m.m[7];
+    r.z = -(m.m[8]*p.x + m.m[9]*p.y + m.m[10]*p.z + m.m[11]);
+    return r;
+}
+
+
+
+
