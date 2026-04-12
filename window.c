@@ -25,6 +25,8 @@ typedef struct{
     vec3 up;
     vec3 right;
     mat4 view;
+    double pitch;
+    double yaw;
 }Camera;
 
 
@@ -50,7 +52,8 @@ int main() {
         {400.0f, 500.0f},
         {400.0f, 200.0f}
     };
-
+    SDL_SetWindowMouseGrab(win, true);
+    SDL_HideCursor();
     vec3 up = {0.0f, 1.0f, 0.0f};
 
     Camera cam;
@@ -63,7 +66,11 @@ int main() {
     cam.target.y = 0.0f;
     cam.target.z = 0.0f;
 
-    cam.direction = normalize(subtract(cam.position, cam.target));
+    cam.pitch = 0.0f;
+    cam.yaw = 0.0f;
+
+    cam.direction = (vec3){cos(cam.yaw * PI/180) * cos(cam.pitch * PI/180), sin(cam.pitch * PI/180), sin(cam.yaw * PI/180) * cos(cam.pitch * PI/180)};
+    cam.direction = normalize(cam.direction);
     cam.right = normalize(cross(up, cam.direction));
     cam.up = cross(cam.direction, cam.right);
 
@@ -109,9 +116,10 @@ int main() {
 
     vec2 projected[8];
     vec3 camera_space[8];
-    
+    float rel_x = 0.0f;
+    float rel_y = 0.0f;
     int running = 1;
-
+                                                                                                                                                                                                                           
     while (running) {
         while (SDL_PollEvent(&e))
             if (e.type == SDL_EVENT_QUIT) running = 0;
@@ -122,13 +130,18 @@ int main() {
         const bool *key_states = SDL_GetKeyboardState(&num);
 
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
+
         if (key_states[SDL_SCANCODE_Z]) {cam.position.z += 0.01;}
         if (key_states[SDL_SCANCODE_X]) {cam.position.x += 0.01;} 
         if (key_states[SDL_SCANCODE_Y]) {cam.position.y += 0.01;} 
-        //rotate_shape(cube, 0.5, 'x', 8);
-        //cam.position.x += 0.001;
-        //cam.position.z += 0.001;
-        cam.direction = normalize(subtract(cam.target, cam.position));
+        if (key_states[SDL_SCANCODE_ESCAPE]) {SDL_ShowCursor();SDL_SetWindowMouseGrab(win, false);} 
+        SDL_MouseButtonFlags buttons = SDL_GetRelativeMouseState(&rel_x, &rel_y);
+        cam.yaw += rel_x;
+        cam.pitch -= rel_y;
+        if(cam.pitch > 89.0f){cam.pitch =  89.0f;}
+        if(cam.pitch < -89.0f){cam.pitch = -89.0f;}
+        cam.direction = (vec3){cos(cam.yaw * PI/180) * cos(cam.pitch * PI/180), sin(cam.pitch * PI/180), sin(cam.yaw * PI/180) * cos(cam.pitch * PI/180)};
+        cam.direction = normalize(cam.direction);
         cam.right = normalize(cross(up, cam.direction));
         cam.up = cross(cam.direction, cam.right);
 
