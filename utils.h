@@ -2,6 +2,7 @@
 #define WIDTH 800
 #define HEIGHT 600
 #define PI 3.14159265358979323846
+#include <SDL3/SDL.h>
 
 typedef struct {
         double x, y;
@@ -84,3 +85,13 @@ int DotVec(vec3 v1, vec3 v2){
     return result;
 }
 
+
+void DrawTriangle(vec3 points3[3], SDL_Renderer *ren, float color[3]){
+    vec2 points2[3];
+    SDL_Vertex points[3];
+    for (int i = 0; i < 3; i++){
+        points2[i] = ProjectPoint(points3[i]);
+        points[i] = (SDL_Vertex){{points2[i].x, points2[i].y},{color[0], color[1], color[2], 1.0f}};
+    }
+    SDL_RenderGeometry(ren, NULL, points, 3, NULL, 0);
+}

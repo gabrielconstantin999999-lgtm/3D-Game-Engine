@@ -20,7 +20,12 @@ int main() {
     SDL_Window *win = SDL_CreateWindow("3D Game Engine", WIDTH, HEIGHT, 0);
     SDL_Renderer *ren = SDL_CreateRenderer(win, NULL);
     SDL_Event e;
-    
+    vec3 direction = {0.0f, 0.0f, 0.0f};
+    Camera cam;
+    cam.position = {0.0f, 0.0f, -5.0f};
+    cam.direction = NormVec(direction);
+    cam.up = {0.0f, 1.0f, 0.0f};
+    cam.right = CrossVec(cam.direction, cam.up);
     
     
     int running = 1;
@@ -35,33 +40,9 @@ int main() {
         const bool *key_states = SDL_GetKeyboardState(&num);
 
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
-        
-        int lenVert = 3;
-        SDL_Vertex vert[lenVert];
-        vert[0].position.x = 400;
-        vert[0].position.y = 50;
-
-        vert[0].color.r = 1.0;
-        vert[0].color.g = 0.0;
-        vert[0].color.b = 0.0;
-        vert[0].color.a = 1.0;
-
-        vert[1].position.x = 50;
-        vert[1].position.y = 550;
-
-        vert[1].color.r = 1.0;
-        vert[1].color.g = 0.0;
-        vert[1].color.b = 0.0;
-        vert[1].color.a = 1.0;
-
-        vert[2].position.x = 750;
-        vert[2].position.y = 550;
-
-        vert[2].color.r = 1.0;
-        vert[2].color.g = 0.0;
-        vert[2].color.b = 0.0;
-        vert[2].color.a = 1.0;
-        SDL_RenderGeometry(ren, NULL, vert, lenVert, NULL, 0);
+        vec3 points[3] = {{-1.0f, 1.0f, 6.0f}, {-1.0f, -1.0f, 6.0f}, {1.0f, 1.0f, 6.0f}};
+        float color[3] = {1.0f, 1.0f, 1.0f};
+        DrawTriangle(points, ren, color);
         SDL_RenderPresent(ren);
         SDL_Delay(16);
     }
