@@ -23,9 +23,10 @@ int main() {
     Camera cam;
     vec3 up = {0.0f, 1.0f, 0.0f};
     vec3 direction = {0.0f, 0.0f, 1.0f};
-    
+    cam.position = (vec3){0.0f, 0.0f, -5.0f};
+    float angle = 0.0f;
     int running = 1;
-                                                                                                                                                                                                                           
+    vec3 target = {0.0f, 0.0f, 0.0f};                                                                                                                                                                                                                      
     while (running) {
         while (SDL_PollEvent(&e))
             if (e.type == SDL_EVENT_QUIT) running = 0;
@@ -34,17 +35,21 @@ int main() {
         SDL_RenderClear(ren);
         int num;
         const bool *key_states = SDL_GetKeyboardState(&num);
-        cam.position = (vec3){0.0f, 0.0f, -5.0f};
-        cam.direction = NormVec(direction);
-        cam.right = CrossVec(cam.direction, up);
+        cam.direction = NormVec(SubVectors(target, cam.position));
+        cam.right = CrossVec(up, cam.direction);
         cam.up = CrossVec(cam.direction, cam.right);
         cam.view = (mat4){cam.right.x, cam.right.y, cam.right.z, 0, cam.up.x, cam.up.y, cam.up.z,0, cam.direction.x, cam.direction.y, cam.direction.z,0, -(DotVec(cam.right, cam.position)), -(DotVec(cam.up, cam.position)), -(DotVec(cam.direction, cam.position)), 1};
+        angle += 0.1;
+        cam.position.x = sin(angle) * 10;
+        cam.position.z = cos(angle) * 10;
         vec3 screen[3];
-        vec3 points[3] = {{-1.0f, 1.0f, 6.0f}, {-1.0f, -1.0f, 6.0f}, {1.0f, 1.0f, 6.0f}};
+        vec3 points[3] = {{-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}};
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
         for (int i = 0; i < 3; i++){
             screen[i] = TransPoint(points[i], cam.view);
+            printf("%d", screen[i]);
         }
+        printf("x: %d, z: %d", cam.position.x, cam.position.z);
         float color[3] = {1.0f, 1.0f, 1.0f};
         DrawTriangle(screen, ren, color);
         SDL_RenderPresent(ren);

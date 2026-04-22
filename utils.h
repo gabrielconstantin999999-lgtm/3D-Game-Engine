@@ -75,6 +75,9 @@ vec3 TransPoint(vec3 p, mat4 m)
 
 vec2 ProjectPoint(vec3 point){
     vec2 projected;
+    if (point.z < 0.1f){
+        return (vec2){NAN,NAN};
+    }
     projected.x = ((point.x/point.z) * WIDTH/2 + WIDTH/2);
     projected.y = ((point.y/point.z) * HEIGHT/2 + HEIGHT/2);
     return projected;
