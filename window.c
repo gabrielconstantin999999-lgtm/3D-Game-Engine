@@ -23,10 +23,11 @@ int main() {
     Camera cam;
     vec3 up = {0.0f, 1.0f, 0.0f};
     vec3 direction = {0.0f, 0.0f, 1.0f};
-    cam.position = (vec3){0.0f, 0.0f, -5.0f};
+    cam.position = (vec3){5.0f, 0.0f, 0.0f};
     float angle = 0.0f;
     int running = 1;
-    vec3 target = {0.0f, 0.0f, 0.0f};                                                                                                                                                                                                                      
+    vec3 target = {0.0f, 0.0f, 0.0f};
+    float color[3] = {1.0f, 1.0f, 1.0f};                                                                                                                                                                                                                   
     while (running) {
         while (SDL_PollEvent(&e))
             if (e.type == SDL_EVENT_QUIT) running = 0;
@@ -39,19 +40,59 @@ int main() {
         cam.right = CrossVec(up, cam.direction);
         cam.up = CrossVec(cam.direction, cam.right);
         cam.view = (mat4){cam.right.x, cam.right.y, cam.right.z, 0, cam.up.x, cam.up.y, cam.up.z,0, cam.direction.x, cam.direction.y, cam.direction.z,0, -(DotVec(cam.right, cam.position)), -(DotVec(cam.up, cam.position)), -(DotVec(cam.direction, cam.position)), 1};
-        angle += 0.1;
-        cam.position.x = sin(angle) * 10;
-        cam.position.z = cos(angle) * 10;
+        //angle += 0.01;
+        //cam.position.x = sin(angle) * 5;
+        //cam.position.z = cos(angle) * 5;
         vec3 screen[3];
+        vec3 screen2[3];
         vec3 points[3] = {{-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}};
-        SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
-        for (int i = 0; i < 3; i++){
-            screen[i] = TransPoint(points[i], cam.view);
-            printf("%d", screen[i]);
+        vec3 points2[3] = {{-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}};
+        vec3 vertices[12][3] = {
+
+            // FRONT (+Z)
+            {{-1,-1, 1}, { 1,-1, 1}, { 1, 1, 1}},
+            {{-1,-1, 1}, { 1, 1, 1}, {-1, 1, 1}},
+
+            // BACK (-Z)
+            {{ 1,-1,-1}, {-1,-1,-1}, {-1, 1,-1}},
+            {{ 1,-1,-1}, {-1, 1,-1}, { 1, 1,-1}},
+
+            // LEFT (-X)
+            {{-1,-1,-1}, {-1,-1, 1}, {-1, 1, 1}},
+            {{-1,-1,-1}, {-1, 1, 1}, {-1, 1,-1}},
+
+            // RIGHT (+X)
+            {{ 1,-1, 1}, { 1,-1,-1}, { 1, 1,-1}},
+            {{ 1,-1, 1}, { 1, 1,-1}, { 1, 1, 1}},
+
+            // TOP (+Y)
+            {{-1, 1, 1}, { 1, 1, 1}, { 1, 1,-1}},
+            {{-1, 1, 1}, { 1, 1,-1}, {-1, 1,-1}},
+
+            // BOTTOM (-Y)
+            {{-1,-1,-1}, { 1,-1,-1}, { 1,-1, 1}},
+            {{-1,-1,-1}, { 1,-1, 1}, {-1,-1, 1}}
+        };
+        vec3 screen3[12][3];
+        for (int i = 0; i < 12; i++){
+            for (int j = 0; j < 3; j++){
+                screen3[i][j] = TransPoint(vertices[i][j], cam.view);
+                DrawTriangle(screen3[i], ren, color);
+            }
+
         }
-        printf("x: %d, z: %d", cam.position.x, cam.position.z);
-        float color[3] = {1.0f, 1.0f, 1.0f};
+        if (key_states[SDL_SCANCODE_W]){cam.position = AddVectors(cam.position, cam.direction);}
+        if (key_states[SDL_SCANCODE_S]){cam.position = SubVectors(cam.position, cam.direction);}
+        /*
+        for (int i = 0; i < 3; i++){
+                screen[i] = TransPoint(points[i], cam.view);
+            }
+        for (int i = 0; i < 3; i++){
+                screen2[i] = TransPoint(points2[i], cam.view);
+            }
         DrawTriangle(screen, ren, color);
+        DrawTriangle(screen2, ren, color);
+*/
         SDL_RenderPresent(ren);
         SDL_Delay(16);
     }
@@ -121,7 +162,6 @@ void rotate_shape(vec3 *points, double angle, char axis, int count){
             }
         };
     }
-
 
 
 
