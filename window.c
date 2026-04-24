@@ -23,11 +23,16 @@ int main() {
     Camera cam;
     vec3 up = {0.0f, 1.0f, 0.0f};
     vec3 direction = {0.0f, 0.0f, 1.0f};
-    cam.position = (vec3){5.0f, 0.0f, 0.0f};
+    cam.position = (vec3){0.0f, 0.0f, -5.0f};
+    cam.pitch = 0.0f;
+    cam.yaw = 0.0f;
     float angle = 0.0f;
     int running = 1;
     vec3 target = {0.0f, 0.0f, 0.0f};
-    float color[3] = {1.0f, 1.0f, 1.0f};                                                                                                                                                                                                                   
+    float color[3] = {1.0f, 1.0f, 1.0f};
+    SDL_SetWindowRelativeMouseMode(win, true);    
+    float dx, dy;
+    Uint32 buttons = SDL_GetRelativeMouseState(&dx, &dy);                                                                                                                                                                                                          
     while (running) {
         while (SDL_PollEvent(&e))
             if (e.type == SDL_EVENT_QUIT) running = 0;
@@ -36,9 +41,17 @@ int main() {
         SDL_RenderClear(ren);
         int num;
         const bool *key_states = SDL_GetKeyboardState(&num);
-        cam.direction = NormVec(SubVectors(target, cam.position));
-        cam.right = CrossVec(up, cam.direction);
-        cam.up = CrossVec(cam.direction, cam.right);
+        SDL_GetRelativeMouseState(&dx, &dy);
+        cam.yaw += dx * PI/180;
+        cam.pitch += dy * PI/180;
+        if (key_states[SDL_SCANCODE_ESCAPE])SDL_SetWindowRelativeMouseMode(win, false);
+        if (cam.pitch > 89.0f * PI / 180.0f) cam.pitch = 89.0f * PI / 180.0f;
+        if (cam.pitch < -89.0f * PI / 180.0f) cam.pitch = -89.0f * PI / 180.0f;
+        cam.direction.x = cos(cam.pitch) * sin(cam.yaw);
+        cam.direction.y = sin(cam.pitch);
+        cam.direction.z = cos(cam.pitch) * cos(cam.yaw);
+        cam.right = NormVec(CrossVec(up, cam.direction)); 
+        cam.up = NormVec(CrossVec(cam.direction, cam.right));
         cam.view = (mat4){cam.right.x, cam.right.y, cam.right.z, 0, cam.up.x, cam.up.y, cam.up.z,0, cam.direction.x, cam.direction.y, cam.direction.z,0, -(DotVec(cam.right, cam.position)), -(DotVec(cam.up, cam.position)), -(DotVec(cam.direction, cam.position)), 1};
         //angle += 0.01;
         //cam.position.x = sin(angle) * 5;
@@ -81,8 +94,6 @@ int main() {
             }
 
         }
-        if (key_states[SDL_SCANCODE_W]){cam.position = AddVectors(cam.position, cam.direction);}
-        if (key_states[SDL_SCANCODE_S]){cam.position = SubVectors(cam.position, cam.direction);}
         /*
         for (int i = 0; i < 3; i++){
                 screen[i] = TransPoint(points[i], cam.view);
@@ -93,6 +104,7 @@ int main() {
         DrawTriangle(screen, ren, color);
         DrawTriangle(screen2, ren, color);
 */
+        printf("%f, %f, %f\n", cam.position.x, cam.position.y, cam.position.z);
         SDL_RenderPresent(ren);
         SDL_Delay(16);
     }

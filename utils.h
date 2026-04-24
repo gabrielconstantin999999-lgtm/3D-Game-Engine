@@ -64,15 +64,11 @@ mat4 MulMat(mat4 a, mat4 b)
     return result;
 }
 
-vec3 TransPoint(vec3 p, mat4 m)
-{
+vec3 TransPoint(vec3 p, mat4 m) {
     vec3 r;
-    r.x = m.m[0]*p.x + m.m[1]*p.y + m.m[2]*p.z + m.m[3];
-    r.y = m.m[4]*p.x + m.m[5]*p.y + m.m[6]*p.z + m.m[7];
-    r.z = m.m[8]*p.x + m.m[9]*p.y + m.m[10]*p.z + m.m[11];
-    r.x += m.m[12];
-    r.y += m.m[13];
-    r.z += m.m[14];
+    r.x = p.x * m.m[0] + p.y * m.m[4] + p.z * m.m[8]  + m.m[12];
+    r.y = p.x * m.m[1] + p.y * m.m[5] + p.z * m.m[9]  + m.m[13];
+    r.z = p.x * m.m[2] + p.y * m.m[6] + p.z * m.m[10] + m.m[14];
     return r;
 }
 
@@ -86,8 +82,8 @@ vec2 ProjectPoint(vec3 point){
     return projected;
 }
 
-int DotVec(vec3 v1, vec3 v2){
-    int result = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+double DotVec(vec3 v1, vec3 v2){
+    double result = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
     return result;
 }
 
