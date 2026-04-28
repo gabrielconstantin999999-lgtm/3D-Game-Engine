@@ -97,3 +97,8 @@ void DrawTriangle(vec3 points3[3], SDL_Renderer *ren, float color[3]){
     }
     SDL_RenderGeometry(ren, NULL, points, 3, NULL, 0);
 }
+
+void DrawCrosshair(SDL_Renderer *ren){
+    SDL_RenderLine(ren, WIDTH/2-10, HEIGHT/2,WIDTH/2+10, HEIGHT/2);
+    SDL_RenderLine(ren, WIDTH/2,HEIGHT/2-10,WIDTH/2,HEIGHT/2+10);
+}

@@ -28,11 +28,9 @@ int main() {
     cam.yaw = 0.0f;
     float angle = 0.0f;
     int running = 1;
-    vec3 target = {0.0f, 0.0f, 0.0f};
     float color[3] = {1.0f, 1.0f, 1.0f};
     SDL_SetWindowRelativeMouseMode(win, true);    
-    float dx, dy;
-    Uint32 buttons = SDL_GetRelativeMouseState(&dx, &dy);                                                                                                                                                                                                          
+    float dx, dy;                                                                                                                                                                                                       
     while (running) {
         while (SDL_PollEvent(&e))
             if (e.type == SDL_EVENT_QUIT) running = 0;
@@ -44,6 +42,35 @@ int main() {
         SDL_GetRelativeMouseState(&dx, &dy);
         cam.yaw += dx * PI/180;
         cam.pitch += dy * PI/180;
+        double speed = 0.1;
+
+        if (key_states[SDL_SCANCODE_W])
+            cam.position = AddVectors(cam.position, (vec3){
+                cam.direction.x * speed,
+                cam.direction.y * speed,
+                cam.direction.z * speed
+            });
+
+        if (key_states[SDL_SCANCODE_S])
+            cam.position = SubVectors(cam.position, (vec3){
+                cam.direction.x * speed,
+                cam.direction.y * speed,
+                cam.direction.z * speed
+            });
+
+        if (key_states[SDL_SCANCODE_D])
+            cam.position = AddVectors(cam.position, (vec3){
+                cam.right.x * speed,
+                cam.right.y * speed,
+                cam.right.z * speed
+            });
+
+        if (key_states[SDL_SCANCODE_A])
+            cam.position = SubVectors(cam.position, (vec3){
+                cam.right.x * speed,
+                cam.right.y * speed,
+                cam.right.z * speed
+            });
         if (key_states[SDL_SCANCODE_ESCAPE])SDL_SetWindowRelativeMouseMode(win, false);
         if (cam.pitch > 89.0f * PI / 180.0f) cam.pitch = 89.0f * PI / 180.0f;
         if (cam.pitch < -89.0f * PI / 180.0f) cam.pitch = -89.0f * PI / 180.0f;
@@ -52,7 +79,10 @@ int main() {
         cam.direction.z = cos(cam.pitch) * cos(cam.yaw);
         cam.right = NormVec(CrossVec(up, cam.direction)); 
         cam.up = NormVec(CrossVec(cam.direction, cam.right));
-        cam.view = (mat4){cam.right.x, cam.right.y, cam.right.z, 0, cam.up.x, cam.up.y, cam.up.z,0, cam.direction.x, cam.direction.y, cam.direction.z,0, -(DotVec(cam.right, cam.position)), -(DotVec(cam.up, cam.position)), -(DotVec(cam.direction, cam.position)), 1};
+        cam.view = (mat4){cam.right.x, cam.right.y, cam.right.z, 0, 
+            cam.up.x, cam.up.y, cam.up.z,0, 
+            cam.direction.x, cam.direction.y, cam.direction.z,0, 
+            -(DotVec(cam.right, cam.position)), -(DotVec(cam.up, cam.position)), -(DotVec(cam.direction, cam.position)), 1};
         //angle += 0.01;
         //cam.position.x = sin(angle) * 5;
         //cam.position.z = cos(angle) * 5;
@@ -90,8 +120,8 @@ int main() {
         for (int i = 0; i < 12; i++){
             for (int j = 0; j < 3; j++){
                 screen3[i][j] = TransPoint(vertices[i][j], cam.view);
-                DrawTriangle(screen3[i], ren, color);
             }
+            DrawTriangle(screen3[i], ren, color);
 
         }
         /*
@@ -105,6 +135,7 @@ int main() {
         DrawTriangle(screen2, ren, color);
 */
         printf("%f, %f, %f\n", cam.position.x, cam.position.y, cam.position.z);
+        printf("%f, %f, %f\n", cam.direction.x, cam.direction.y, cam.direction.z);
         SDL_RenderPresent(ren);
         SDL_Delay(16);
     }
@@ -174,7 +205,6 @@ void rotate_shape(vec3 *points, double angle, char axis, int count){
             }
         };
     }
-
 
 
 
