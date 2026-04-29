@@ -8,10 +8,6 @@
 
 
 
-void draw_polygon(vec2* points, int count, SDL_Renderer* renderer);
-
-void bind_cube(vec2* points,SDL_Renderer* renderer);
-void rotate_shape(vec3 *points, double angle, char axis, int count);
 
 
 int main() {
@@ -28,7 +24,7 @@ int main() {
     cam.yaw = 0.0f;
     float angle = 0.0f;
     int running = 1;
-    float color[3] = {1.0f, 1.0f, 1.0f};
+    float color[3] = {1.0f, 0.0f, 0.0f};
     SDL_SetWindowRelativeMouseMode(win, true);    
     float dx, dy;                                                                                                                                                                                                       
     while (running) {
@@ -155,58 +151,12 @@ int main() {
 
 
 
-void draw_polygon(vec2* points, int count, SDL_Renderer* renderer){
-    if (count < 2){
-        return;
-    }
-    for (int i = 0; i < count; i += 1){
-        vec2 a = points[i];
-        vec2 b = points[(i + 1) % count];
-        SDL_RenderLine(renderer, a.x,a.y,b.x,b.y);
-    }
-}
 
 
 
 
-void bind_cube(vec2* points,SDL_Renderer* renderer){
-    int sides[4][4] = {
-        {0,1,2,3},{4,5,6,7},{1,2,6,5},{0,3,7,4}
-    };
-    for (int i = 0; i < 4; i++){
-        vec2 face[4] = {points[sides[i][0]], points[sides[i][1]],points[sides[i][2]],points[sides[i][3]]};
-        draw_polygon(face, 4, renderer);
-    }
-}
 
-void rotate_shape(vec3 *points, double angle, char axis, int count){
-    angle *= (PI/180);
-        for (int i = 0; i < count; i += 1){
-            double x = points[i].x;
-            double y = points[i].y;
-            double z = points[i].z;
-        switch(axis){
-            case 'x':
-                points[i].x = x * 1 + y * 0 + z * 0;
-                points[i].y = x * 0 + y * cos(angle) - z * sin(angle);
-                points[i].z = x * 0 + y * sin(angle) + z * cos(angle);
-                
-                break;
-            case 'y':
-                points[i].x = x * cos(angle) + y * 0 + z * sin(angle);
-                points[i].y = x * 0 + y * 1 + z * 0;
-                points[i].z = x * sin(angle) * -1 + y * 0 + z * cos(angle);
-                    
-                break;
-            case 'z':
-                points[i].x = x * cos(angle) - y * sin(angle) + z * 0;
-                points[i].y = x * sin(angle) + y * cos(angle) + z * 0;
-                points[i].z = x * 0 + y * 0 + z * 1;
-                        
-                break;
-            }
-        };
-    }
+
 
 
 
