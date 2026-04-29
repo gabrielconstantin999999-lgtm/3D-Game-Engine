@@ -79,10 +79,12 @@ int main() {
         cam.direction.z = cos(cam.pitch) * cos(cam.yaw);
         cam.right = NormVec(CrossVec(up, cam.direction)); 
         cam.up = NormVec(CrossVec(cam.direction, cam.right));
-        cam.view = (mat4){cam.right.x, cam.right.y, cam.right.z, 0, 
-            cam.up.x, cam.up.y, cam.up.z,0, 
-            cam.direction.x, cam.direction.y, cam.direction.z,0, 
-            -(DotVec(cam.right, cam.position)), -(DotVec(cam.up, cam.position)), -(DotVec(cam.direction, cam.position)), 1};
+        cam.view = (mat4){
+            cam.right.x, cam.up.x, cam.direction.x, 0,
+            cam.right.y, cam.up.y, cam.direction.y, 0,
+            cam.right.z, cam.up.z, cam.direction.z, 0,
+            -(DotVec(cam.right, cam.position)), -(DotVec(cam.up, cam.position)), -(DotVec(cam.direction, cam.position)), 1
+        };
         //angle += 0.01;
         //cam.position.x = sin(angle) * 5;
         //cam.position.z = cos(angle) * 5;
