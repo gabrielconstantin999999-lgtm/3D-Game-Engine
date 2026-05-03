@@ -84,10 +84,9 @@ int main() {
         //angle += 0.01;
         //cam.position.x = sin(angle) * 5;
         //cam.position.z = cos(angle) * 5;
-        vec3 screen[3];
-        vec3 screen2[3];
         vec3 points[3] = {{-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}};
         vec3 points2[3] = {{-1.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}};
+        /*
         vec3 vertices[12][3] = {
 
             // FRONT (+Z)
@@ -114,24 +113,17 @@ int main() {
             {{-1,-1,-1}, { 1,-1,-1}, { 1,-1, 1}},
             {{-1,-1,-1}, { 1,-1, 1}, {-1,-1, 1}}
         };
-        vec3 screen3[12][3];
-        for (int i = 0; i < 12; i++){
-            for (int j = 0; j < 3; j++){
-                screen3[i][j] = TransPoint(vertices[i][j], cam.view);
+        */
+        double x = 0;
+        double z = 0;
+        for (int i = 0; i < 10; i++){
+            for (int j = 0; j < 10; j++){
+                vec3 cube[12][3];
+                vec3 pos = {i,1,j};
+                PosToVert(cube,pos);
+                RenderCube(cube, cam.view, ren, color);
             }
-            DrawTriangle(screen3[i], ren, color);
-
         }
-        /*
-        for (int i = 0; i < 3; i++){
-                screen[i] = TransPoint(points[i], cam.view);
-            }
-        for (int i = 0; i < 3; i++){
-                screen2[i] = TransPoint(points2[i], cam.view);
-            }
-        DrawTriangle(screen, ren, color);
-        DrawTriangle(screen2, ren, color);
-*/
         printf("%f, %f, %f\n", cam.position.x, cam.position.y, cam.position.z);
         printf("%f, %f, %f\n", cam.direction.x, cam.direction.y, cam.direction.z);
         SDL_RenderPresent(ren);
