@@ -1,7 +1,9 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
 #include<math.h>
-#include"utils.h"
+#include "camera.h"
+#include "math_utils.h"
+#include "renderer.h"
 
 
 
