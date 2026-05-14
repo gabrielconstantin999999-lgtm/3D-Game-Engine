@@ -42,7 +42,6 @@ void RenderCube(vec3 vertices[12][3],mat4 camView, SDL_Renderer *ren, float *col
                 screen[i][j] = TransPoint(vertices[i][j], camView);
             }
             DrawTriangle(screen[i], ren, color);
-
         }
 }
 

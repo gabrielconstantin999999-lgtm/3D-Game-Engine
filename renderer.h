@@ -2,7 +2,6 @@
 #define RENDERER_H
 #define WIDTH 800
 #define HEIGHT 600
-#include "renderer.h"
 #include "math_utils.h"
 #include <SDL3/SDL.h>
 vec3 TransPoint(vec3 p, mat4 m);
